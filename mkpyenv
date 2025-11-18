@@ -1,0 +1,74 @@
+#!/bin/bash
+
+TEMPLATE_ROOT="$HOME/templates"
+
+# --- CONFIGURATION ---
+# Define where your templates live
+TEMPLATE_SRC="$HOME/templates/python-standard"
+# ---------------------
+
+# 1. Input Validation
+if [ -z "$1" ]; then
+    echo "❌ Error: No directory name provided."
+    echo "Usage: mkpyenv <project_name>"
+    exit 1
+fi
+
+PROJECT_NAME="$1"
+PROJECT_DIR="$(pwd)/$PROJECT_NAME"
+
+# 2. Check if Template Exists
+if [ ! -d "$TEMPLATE_SRC" ]; then
+    echo "❌ Error: Template directory not found at $TEMPLATE_SRC"
+    exit 1
+fi
+
+# 3. Create Project Directory
+if [ -d "$PROJECT_DIR" ]; then
+    echo "⚠️  Directory $PROJECT_NAME already exists. Aborting to prevent overwrite."
+    exit 1
+fi
+
+mkdir -p "$PROJECT_DIR"
+echo "📂 Created directory: $PROJECT_NAME"
+
+# 4. Clone Template Files
+# We use dot (.) to ensure hidden files like .gitignore are copied
+cp -r "$TEMPLATE_SRC/." "$PROJECT_DIR/"
+echo "📄 Template files copied."
+
+# 5. Dynamic Placeholder Replacement (Hydration)
+# This finds {{PROJECT_NAME}} in README.md and main.py and replaces it with the real name
+sed -i "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$PROJECT_DIR/README.md"
+sed -i "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$PROJECT_DIR/main.py"
+
+# 6. Create Virtual Environment
+echo "🐍 Creating Python virtual environment..."
+cd "$PROJECT_DIR" || exit
+python3 -m venv .venv
+
+# 7. Completion
+echo "---------------------------------------"
+echo "✅ Project '$PROJECT_NAME' initialized!"
+echo "📂 Location: $PROJECT_DIR"
+echo "📄 Generated: README, LICENSE, main.py, notebook.ipynb"
+echo "👉 To start: source .venv/bin/activate"
+echo "---------------------------------------"
+
+# --- Autocomplete for mkpyenv ---
+_mkpyenv_completions()
+{
+  # COMP_WORDS is an array of words in the current command line
+  # COMP_CWORD is the index of the word currently being typed
+
+  if [ "${#COMP_WORDS[@]}" != "3" ]; then
+    return
+  fi
+
+  # Only suggest completions for the 2nd argument (template type)
+  # The possible words are "standard" and "data"
+  COMPREPLY=($(compgen -W "standard data" "${COMP_WORDS[1]}"))
+}
+
+# Register the function to the script name
+complete -F _mkpyenv_completions mkpyenv

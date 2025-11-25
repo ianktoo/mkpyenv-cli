@@ -1,6 +1,3 @@
-# 🚀 mkpyenv v2.0.0: Fast Python Project Initialization CLI
-License: MIT
-
 ## 💡 What is mkpyenv?
 
 **mkpyenv** (Make Python Environment) is a simple **Bash command-line interface (CLI)** tool designed to eliminate setup overhead for new Python projects.
@@ -28,10 +25,10 @@ The previous version contained a bug where the `--help` flag failed, and it lack
 
 **To ensure you are running the latest, fixed version, please execute the update command:**
 
-```bash
+``` bash
 # This command finds the location of your current script and overwrites it with v2.0.0.
 curl -sL [https://raw.githubusercontent.com/ianktoo/mkpyenv-cli/main/mkpyenv](https://raw.githubusercontent.com/ianktoo/mkpyenv-cli/main/mkpyenv) -o "$(which mkpyenv)" && chmod +x "$(which mkpyenv)"
-
+```
 
 -----
 
@@ -120,5 +117,3 @@ mkpyenv --help
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
-```
-```

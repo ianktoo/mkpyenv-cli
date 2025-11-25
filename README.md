@@ -27,7 +27,7 @@ The previous version contained a bug where the `--help` flag failed, and it lack
 
 ``` bash
 # This command finds the location of your current script and overwrites it with v2.0.0.
-curl -sL [https://raw.githubusercontent.com/ianktoo/mkpyenv-cli/main/mkpyenv](https://raw.githubusercontent.com/ianktoo/mkpyenv-cli/main/mkpyenv) -o "$(which mkpyenv)" && chmod +x "$(which mkpyenv)"
+curl -sL https://raw.githubusercontent.com/ianktoo/mkpyenv-cli/main/mkpyenv -o "$(which mkpyenv)" && chmod +x "$(which mkpyenv)"
 ```
 
 -----

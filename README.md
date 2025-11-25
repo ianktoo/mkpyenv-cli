@@ -48,7 +48,7 @@ sudo apt install python3-venv
 1.  **Clone the Repository:**
 
     ```bash
-    git clone [https://github.com/ianktoo/mkpyenv-cli.git](https://github.com/ianktoo/mkpyenv-cli.git)
+    git clone https://github.com/ianktoo/mkpyenv-cli.git
     cd mkpyenv-cli
     ```
 

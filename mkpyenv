@@ -1,37 +1,77 @@
 #!/bin/bash
-# Terminal Guardian: Elite DevOps Specialist Script - DEPRECATED VERSION ENFORCER
+# Terminal Guardian: Elite DevOps Specialist Script - FIXED VERSION v2.0.0
 
 # --- SECURITY & ERROR HANDLING ---
+# Exit immediately if a command exits with a non-zero status.
 set -e
+# Exit on any failure in a pipeline.
+set -o pipefail 
 
-# --- VERSION CONTROL CONFIGURATION ---
-# Define the version of this deprecated script.
-CURRENT_SCRIPT_VERSION="1.0.0"
-# Define the minimum version required to run (the version of the fixed script).
-REQUIRED_VERSION="2.0.0" 
-# Define the raw GitHub URL for the fixed script.
-RAW_SCRIPT_URL="https://raw.githubusercontent.com/ianktoo/mkpyenv-cli/main/mkpyenv"
-# -------------------------------------
+# Define the version of this fixed script. This allows it to pass the check.
+CURRENT_SCRIPT_VERSION="2.0.0" 
 
-# --- MANDATORY UPDATE CHECK ---
-if [[ "$CURRENT_SCRIPT_VERSION" < "$REQUIRED_VERSION" ]]; then
-    # Print stern warning and update instructions to the user's terminal
-    echo "=========================================================="
-    echo "🚨 URGENT: mkpyenv Script Update Required! 🚨"
-    echo "Your current version (v$CURRENT_SCRIPT_VERSION) is deprecated and contains bugs (e.g., failed --help support)."
-    echo "Execution aborted to ensure system integrity."
+# --- CONFIGURATION ---
+TEMPLATE_ROOT="$HOME/templates"
+# Define where your templates live
+TEMPLATE_SRC="$TEMPLATE_ROOT/python-standard"
+# ---------------------
+
+# 1. Input Validation and Help Flag Check
+# Check specifically for the --help flag
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    echo "📘 Usage: mkpyenv <project_name>"
+    echo "  Initializes a new Python project by copying the standard template."
+    echo "  Version: v$CURRENT_SCRIPT_VERSION"
     echo ""
-    echo "👉 ACTION REQUIRED: Update to v$REQUIRED_VERSION immediately by running:"
-    echo ""
-    # The $(which mkpyenv) command finds the exact location of the script in the user's PATH
-    echo "    curl -sL $RAW_SCRIPT_URL -o \"\$(which mkpyenv)\" && chmod +x \"\$(which mkpyenv)\""
-    echo ""
-    echo "=========================================================="
-    exit 1 # Exit with non-zero status to indicate failure/interruption
+    echo "Arguments:"
+    echo "  <project_name>    The name of the new project directory."
+    exit 0
 fi
 
-# -------------------------------
-# The original, buggy script logic should be placed HERE if you want it to run 
-# if the user manually changes their CURRENT_SCRIPT_VERSION (NOT RECOMMENDED).
-# Since you want to force the fix, we omit the old code here.
-# -------------------------------
+# Check if an argument was provided at all
+if [ -z "$1" ]; then
+    echo "❌ Error: No directory name provided."
+    echo "Usage: mkpyenv <project_name>"
+    echo "Run 'mkpyenv --help' for more information."
+    exit 1
+fi
+
+PROJECT_NAME="$1"
+PROJECT_DIR="$(pwd)/$PROJECT_NAME"
+
+# 2. Check if Template Exists
+if [ ! -d "$TEMPLATE_SRC" ]; then
+    echo "❌ Error: Template directory not found at $TEMPLATE_SRC"
+    exit 1
+fi
+
+# 3. Create Project Directory
+if [ -d "$PROJECT_DIR" ]; then
+    echo "⚠️  Directory **$PROJECT_NAME** already exists. Aborting to prevent overwrite."
+    exit 1
+fi
+
+mkdir -p "$PROJECT_DIR"
+echo "📂 Created directory: **$PROJECT_NAME**"
+
+# 4. Clone Template Files
+cp -r "$TEMPLATE_SRC/." "$PROJECT_DIR/"
+echo "📄 Template files copied."
+
+# 5. Dynamic Placeholder Replacement (Hydration)
+# Use sed -i.bak for in-place edit with a backup, and clean up the backup files.
+sed -i.bak "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$PROJECT_DIR/README.md"
+sed -i.bak "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$PROJECT_DIR/main.py"
+find "$PROJECT_DIR" -type f -name "*.bak" -delete
+
+# 6. Create Virtual Environment
+echo "🐍 Creating Python virtual environment..."
+cd "$PROJECT_DIR" || exit 1
+python3 -m venv .venv
+
+# 7. Completion
+echo "---------------------------------------"
+echo "✅ Project '$PROJECT_NAME' initialized!"
+echo "📂 Location: $PROJECT_DIR"
+echo "👉 To start: source .venv/bin/activate"
+echo "---------------------------------------"
